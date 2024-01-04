@@ -89,7 +89,7 @@ window.addEventListener("load", function () {
     }
   }
   class Enemy {
-    Constructor(game) {
+    constructor(game) {
       this.game = game;
       this.x = this.game.width;
       this.speedX = Math.random() * -1.5 - .5; //move to left
@@ -100,7 +100,7 @@ window.addEventListener("load", function () {
       if (this.x +this.width < 0) this.markedForDeletion = true;  //if off screen
     }
     draw(context) {
-      context.fillStyle = "red";
+      context.fillStyle = "aqua";
       context.fillRect(this.x, this.y, this.width, this.height);
   }
 }
@@ -108,9 +108,9 @@ window.addEventListener("load", function () {
 class Angler1 extends Enemy {
   constructor(game) {
     super(game); //this will inherit all the properties from the enemy class combines the two classes properties together
-    this.width = 228;
-    this.height = 169;
-    this.y = Math.random() * (this.game.height *.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Angler1
+    this.width = 228 / 2;
+    this.height = 169 / 2;
+    this.y = Math.random() * (this.game.height * 0.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Angler1
   }
 
 
@@ -141,10 +141,14 @@ class Angler1 extends Enemy {
       this.input = new InputHandler(this);
       this.ui = new UI(this);
       this.keys = []; //saves all key presses and allows me to pass it to the player class as well
+      this.enemies = [];
+      this.enemyTimer = 0;
+      this.enemyInterval = 1000;//1 second
       this.ammo = 20
       this.maxAmmo = 50
       this.ammoTimer = 0
-      this.ammoInterval = 500;
+      this.ammoInterval = 500;//.5 second
+      this.gameOver = false;
     }
     update(deltaTime) {
       this.player.update();
@@ -154,10 +158,28 @@ class Angler1 extends Enemy {
       } else {
         this.ammoTimer += deltaTime
       } // this is so we can use the deltaTime in the update method to track ammo timer
+      this.enemies.forEach((enemy) => {
+        enemy.update();
+      });
+      this.enemies = this.enemies.filter(
+        (enemy) => !enemy.markedForDeletion
+      ); 
+        if(this.enemyTimer > this.enemyInterval && !this.gameOver){
+          this.addEnemy();
+          this.enemyTimer = 0 //reset timer
+        }else{
+          this.enemyTimer += deltaTime
+        }
     }
     draw(context) {
       this.player.draw(context); //it take this param above so has to here
       this.ui.draw(context);
+      this.enemies.forEach((enemy) => {
+        enemy.draw(context);
+      });
+    }
+    addEnemy() {
+      this.enemies.push(new Angler1(this));
     }
   }
   const game = new Game(canvas.width, canvas.height);
@@ -169,6 +191,7 @@ class Angler1 extends Enemy {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // will clear the canvas b4 loop
     game.update(deltaTime);
     game.draw(ctx); // this is telling where we want it drawn then passes it back to the game/player class draw methods
+   
     requestAnimationFrame(animate);//this function has timeStamps built in
   }
   animate(0);
