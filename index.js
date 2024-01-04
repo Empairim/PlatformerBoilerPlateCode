@@ -90,13 +90,29 @@ window.addEventListener("load", function () {
   }
   class Layer {}
   class Background {}
-  class UI {}
+  class UI {
+    constructor(game) {
+      this.game = game;
+      this.fontSize = 30;
+      this.fontFamily = "Helvetica";
+      this.color = "gold";
+    }
+    
+    draw(context) {
+      //draw ammo
+      context.fillStyle = this.color;
+      for (let i = 0;i < this.game.ammo;i++){
+        context.fillRect(20+ 5 * i, 50, 3, 20)
+      }
+    }
+  }
   class Game {
     constructor(width, height) {
       this.width = width;
       this.height = height;
       this.player = new Player(this); // This allows you to have multiple instances of the Game class, each with its own set of players, and they won't interfere with each other.
       this.input = new InputHandler(this);
+      this.ui = new UI(this);
       this.keys = []; //saves all key presses and allows me to pass it to the player class as well
       this.ammo = 20
       this.maxAmmo = 50
@@ -114,6 +130,7 @@ window.addEventListener("load", function () {
     }
     draw(context) {
       this.player.draw(context); //it take this param above so has to here
+      this.ui.draw(context);
     }
   }
   const game = new Game(canvas.width, canvas.height);
