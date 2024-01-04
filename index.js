@@ -88,6 +88,33 @@ window.addEventListener("load", function () {
      }
     }
   }
+  class Enemy {
+    Constructor(game) {
+      this.game = game;
+      this.x = this.game.width;
+      this.speedX = Math.random() * -1.5 - .5; //move to left
+      this.markedForDeletion = false;
+    }
+    update() {
+      this.x += this.speedX; //move from right to left
+      if (this.x +this.width < 0) this.markedForDeletion = true;  //if off screen
+    }
+    draw(context) {
+      context.fillStyle = "red";
+      context.fillRect(this.x, this.y, this.width, this.height);
+  }
+}
+//to inherit from enemy class
+class Angler1 extends Enemy {
+  constructor(game) {
+    super(game); //this will inherit all the properties from the enemy class combines the two classes properties together
+    this.width = 228;
+    this.height = 169;
+    this.y = Math.random() * (this.game.height *.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Angler1
+  }
+
+
+}
   class Layer {}
   class Background {}
   class UI {
