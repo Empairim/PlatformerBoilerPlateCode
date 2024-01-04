@@ -5,7 +5,7 @@ window.addEventListener("load", function () {
   const ctx = canvas.getContext("2d");
   canvas.width = 1500;
   canvas.height = 500;
-
+  
   // Improved version of my player handler from last game
   class InputHandler {
     constructor(game) {
@@ -82,8 +82,10 @@ window.addEventListener("load", function () {
       });
     }
     shootTop() {
-      this.projectiles.push(new Projectile(this.game, this.x, this.y));
-      console.log(this.projectiles);
+      if (this.game.ammo > 0){
+      this.projectiles.push(new Projectile(this.game, this.x, this.y + 30));
+      this.game.ammo--;
+     }
     }
   }
   class Layer {}
@@ -96,21 +98,34 @@ window.addEventListener("load", function () {
       this.player = new Player(this); // This allows you to have multiple instances of the Game class, each with its own set of players, and they won't interfere with each other.
       this.input = new InputHandler(this);
       this.keys = []; //saves all key presses and allows me to pass it to the player class as well
+      this.ammo = 20
+      this.maxAmmo = 50
+      this.ammoTimer = 0
+      this.ammoInterval = 500;
     }
-    update() {
+    update(deltaTime) {
       this.player.update();
+      if(this.ammoTimer > this.ammoInterval){
+        if(this.ammo < this.maxAmmo) this.ammo++
+        this.ammoTimer = 0 //reset timer and the above if statement will add ammo if less than max
+      } else {
+        this.ammoTimer += deltaTime
+      } // this is so we can use the deltaTime in the update method to track ammo timer
     }
     draw(context) {
       this.player.draw(context); //it take this param above so has to here
     }
   }
   const game = new Game(canvas.width, canvas.height);
+  let lastTime = 0
   // animation/game loop
-  function animate() {
+  function animate(timeStamp) {
+    const deltaTime = timeStamp - lastTime
+    lastTime = timeStamp // this is so we can use the deltaTime in the update method
     ctx.clearRect(0, 0, canvas.width, canvas.height); // will clear the canvas b4 loop
-    game.update();
+    game.update(deltaTime);
     game.draw(ctx); // this is telling where we want it drawn then passes it back to the game/player class draw methods
-    requestAnimationFrame(animate);
+    requestAnimationFrame(animate);//this function has timeStamps built in
   }
-  animate();
+  animate(0);
 });
