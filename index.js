@@ -38,6 +38,7 @@ window.addEventListener("load", function () {
       this.height = 3;
       this.speed = 3;
       this.markedForDeletion = false;
+      this.image = new Image();
     }
     update() {
       this.x += this.speed;
@@ -94,6 +95,9 @@ window.addEventListener("load", function () {
       this.x = this.game.width;
       this.speedX = Math.random() * -1.5 - .5; //move to left
       this.markedForDeletion = false;
+      this.lives = 5
+      this.score = this.lives
+
     }
     update() {
       this.x += this.speedX; //move from right to left
@@ -102,14 +106,17 @@ window.addEventListener("load", function () {
     draw(context) {
       context.fillStyle = "aqua";
       context.fillRect(this.x, this.y, this.width, this.height);
+      context.fillStyle = "black";
+      context.font = "30px Helvetica";
+      context.fillText(this.lives, this.x, this.y)
   }
 }
 //to inherit from enemy class
 class Angler1 extends Enemy {
   constructor(game) {
     super(game); //this will inherit all the properties from the enemy class combines the two classes properties together
-    this.width = 228 / 2;
-    this.height = 169 / 2;
+    this.width = 228 / 5;
+    this.height = 169 / 5;
     this.y = Math.random() * (this.game.height * 0.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Angler1
   }
 
@@ -122,15 +129,24 @@ class Angler1 extends Enemy {
       this.game = game;
       this.fontSize = 30;
       this.fontFamily = "Helvetica";
-      this.color = "gold";
+      this.color = "white";
     }
     
     draw(context) {
-      //draw ammo
+      context.save()// saves a state of the canvas so this wont effect the rest of the canvas
       context.fillStyle = this.color;
+      context.shadowOffsetX = 2;
+      context.shadowOffsetY = 2;
+      context.shadowColor = "black";
+      context.font = `${this.fontSize}px ${this.fontFamily}`;
+      //draw score
+      context.fillText('Score: ' + this.game.score, 20, 40);
+      //draw ammo
+      
       for (let i = 0;i < this.game.ammo;i++){
         context.fillRect(20+ 5 * i, 50, 3, 20)
       }
+      context.restore() // restores the state of the canvas
     }
   }
   class Game {
@@ -149,6 +165,8 @@ class Angler1 extends Enemy {
       this.ammoTimer = 0
       this.ammoInterval = 500;//.5 second
       this.gameOver = false;
+      this.score = 0
+      this.winningScore = 10
     }
     update(deltaTime) {
       this.player.update();
@@ -160,6 +178,22 @@ class Angler1 extends Enemy {
       } // this is so we can use the deltaTime in the update method to track ammo timer
       this.enemies.forEach((enemy) => {
         enemy.update();
+        if (this.collisionCheck(this.player, enemy)){
+          enemy.markedForDeletion = true;
+        } 
+        this.player.projectiles.forEach((projectile) => {
+          if (this.collisionCheck(projectile, enemy)) {
+            enemylives--
+            enemy.markedForDeletion = true;
+            if(enemylives === 0){
+              enemy.markedForDeletion = true;
+              this.score += enemy.score
+              if(this.score === this.winningScore){
+                this.gameOver = true
+              }
+            }
+          }
+        })
       });
       this.enemies = this.enemies.filter(
         (enemy) => !enemy.markedForDeletion
@@ -180,6 +214,15 @@ class Angler1 extends Enemy {
     }
     addEnemy() {
       this.enemies.push(new Angler1(this));
+      
+    }
+    collisionCheck(rect1,rect2){
+      return(
+        rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y
+      )
     }
   }
   const game = new Game(canvas.width, canvas.height);
