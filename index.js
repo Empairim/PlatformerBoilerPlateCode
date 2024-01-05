@@ -133,7 +133,7 @@ class Angler1 extends Enemy {
     }
     
     draw(context) {
-      context.save()// saves a state of the canvas so this wont effect the rest of the canvas
+      context.save()// saves a state of the canvas so this wont effect the rest of the canvas just the text below
       context.fillStyle = this.color;
       context.shadowOffsetX = 2;
       context.shadowOffsetY = 2;
